@@ -1,0 +1,41 @@
+{
+  "name": "awscostchart",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "typings": "./src/typings/index.d.ts",
+  "scripts": {
+    "build": "gulp tsc && gulp browserify && gulp copy",
+    "release": "gulp tsc && gulp browserify && gulp minify && gulp copy",
+    "clean": "gulp clean",
+    "start": "python main.py"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/megmogmog1965/awscostchart.git"
+  },
+  "author": "Yusuke Kawatsu",
+  "homepage": "https://github.com/megmogmog1965/awscostchart#readme",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/megmogmog1965/awscostchart/issues"
+  },
+  "dependencies": {
+    "highcharts": "^4.2.5"
+  },
+  "devDependencies": {
+    "browserify": "^13.0.1",
+    "del": "^2.2.1",
+    "gulp": "^3.9.1",
+    "gulp-rename": "^1.2.2",
+    "gulp-shell": "^0.5.2",
+    "gulp-typescript": "^2.13.6",
+    "gulp-uglify": "^1.5.4",
+    "react": "^15.2.1",
+    "react-dom": "^15.2.1",
+    "require-dir": "^0.3.0",
+    "typescript": "^1.8.10",
+    "vinyl-buffer": "^1.0.0",
+    "vinyl-source-stream": "^1.1.0"
+  }
+}
