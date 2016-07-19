@@ -1,12 +1,17 @@
 var dest = './static';
+var build = './build';
 var src = './src';
 var path = require('path');
 var relativeSrcPath = path.relative('.', src);
 
 module.exports = {
+  tsd: {
+    json: src + '/tsd.json'
+  },
+
   tsc: {
     src: src + '/**/*.{ts,tsx}',
-    dest: dest
+    dest: build
   },
 
   copy: {
@@ -16,7 +21,7 @@ module.exports = {
 
   browserify: {
     entry: {
-      entries: dest + '/ts/app.js',
+      entries: build + '/ts/app.js',
       debug: true
     },
     dest: dest + '/js',
@@ -31,7 +36,12 @@ module.exports = {
     dest: dest + '/js'
   },
 
+  watch: {
+    ts: relativeSrcPath + '/ts/*.ts',
+    js: relativeSrcPath + '/js/*.js'
+  },
+
   clean: {
-    dirs: [dest]
+    dirs: [dest, build]
   }
 }

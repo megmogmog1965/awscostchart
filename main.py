@@ -17,13 +17,20 @@ from flask import jsonify
 from flask_autodoc.autodoc import Autodoc
 
 # my modules.
-pass
+from server.http_error import _HttpError
 
 
 # flask app.
 app = Flask(__name__, static_path=u'/static', static_folder=u'./static')
 app.debug = True
 auto = Autodoc(app)
+
+# register error handler.
+@app.errorhandler(_HttpError)
+def handle_invalid_usage(error):
+    response = jsonify(error.to_dict())
+    response.status_code = error.status_code
+    return response
 
 # on memory database.
 _comments = []

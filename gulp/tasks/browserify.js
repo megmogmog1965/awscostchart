@@ -6,11 +6,11 @@ var sourcemaps = require('gulp-sourcemaps');
 var config = require('../config');
 
 gulp.task('browserify', function(){
-    return browserify(config.browserify.entry)
-        .bundle()
-        .pipe(source(config.browserify.output.filename))
-        .pipe(buffer())
-        .pipe(sourcemaps.init({loadMaps: true}))
-        .pipe(sourcemaps.write('./'))
-        .pipe(gulp.dest(config.browserify.dest));
+  return browserify(config.browserify.entry)
+    .bundle()
+    .pipe(source(config.browserify.output.filename))
+    .pipe(buffer())
+    .pipe(sourcemaps.init({loadMaps: true}))
+    .pipe(sourcemaps.write('./'))
+    .pipe(gulp.dest(config.browserify.dest));
 });

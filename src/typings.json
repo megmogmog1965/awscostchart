@@ -1,6 +1,15 @@
 {
   "dependencies": {
+    "es6-promise": "registry:npm/es6-promise#3.0.0+20160211003958",
+    "flux": "registry:npm/flux#2.1.1+20160601175240",
     "react": "registry:npm/react#15.0.1+20160601175240",
     "react-dom": "registry:npm/react-dom#15.0.1+20160705210405"
+  },
+  "globalDependencies": {
+    "crossroads": "registry:dt/crossroads#0.0.0+20160317120654",
+    "hasher": "registry:dt/hasher#0.0.0+20160317120654",
+    "jquery": "registry:dt/jquery#1.10.0+20160704162008",
+    "js-signals": "registry:dt/js-signals#0.0.0+20160316155526",
+    "node": "registry:dt/node#6.0.0+20160709114037"
   }
 }

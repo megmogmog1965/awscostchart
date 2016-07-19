@@ -1,5 +1,7 @@
 node_modules/
 .settings/
+.DS_Store
+static/
 
 
 ########################## github: python ##########################
