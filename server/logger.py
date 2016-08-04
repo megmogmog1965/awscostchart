@@ -2,7 +2,7 @@
 # encoding: utf-8
 
 '''
-Created on Jul 18, 2016
+Created on Aug 4, 2016
 
 @author: Yusuke Kawatsu.
 '''
@@ -13,11 +13,10 @@ import logging
 from logging.config import fileConfig
 
 # my modules.
-from flaskserver.constants import _ROOT_DIR
+from server.util import root_dir
 
 
 # setup logger.
-conf_path = os.path.join(_ROOT_DIR, u'logging.ini')
-fileConfig(conf_path)
-logger = logging.getLogger(u'infraapp')
-
+_conf_path = os.path.join(root_dir(), u'logging.ini')
+fileConfig(_conf_path)
+logger = logging.getLogger(u'awscostchart')

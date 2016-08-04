@@ -2,7 +2,7 @@
 # encoding: utf-8
 
 '''
-Created on Jul 18, 2016
+Created on Aug 4, 2016
 
 :author: Yusuke Kawatsu
 '''
@@ -12,16 +12,14 @@ import os
 import copy
 import time
 import shutil
-import codecs
-import sqlite3
 import tempfile
 import datetime
 
 # installed modules.
-
+pass
 
 # my modules.
-from flaskserver.constants import _REPO_URL, _DATA_DIR, _SCHEMA_PATH
+pass
 
 
 class TempDir(object):
@@ -51,6 +49,18 @@ class TempDir(object):
         if os.path.isdir(self._name):
             shutil.rmtree(self._name)
 
+class Dot(object):
+    def __init__(self, dic):
+        self._dic = dic
+    
+    def __getattr__(self, attr):
+        raw = self._dic[attr]
+        return Dot(raw) if isinstance(raw, dict) else raw
+
+
+def root_dir():
+    parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    return to_unicode(parent_dir)
 
 def to_unicode(encodedStr):
     ''' an unicode-str. '''
@@ -81,25 +91,6 @@ def strtime(dtime=None):
     '''
     target = dtime if dtime else datetime.datetime.utcnow()
     return to_unicode(target.strftime(u'%Y-%m-%dT%H:%M:%S.%fZ'))
-
-def replace_key(curkey, newkey, node):
-    '''
-    :param curkey: current key.
-    :param newkey: new key.
-    :param node: a node of tree.
-    '''
-    target = node
-    
-    if isinstance(node, (list, tuple, )):
-        target = [ replace_key(curkey, newkey, child) for child in node ]
-    
-    elif isinstance(node, dict):
-        target = { k: replace_key(curkey, newkey, v) for k, v in node.items() }
-        if curkey in target:
-            val = target.pop(curkey)
-            target[newkey] = val
-    
-    return target
 
 def retry(func, times=3, cooldown=10):
     '''
@@ -134,26 +125,23 @@ def merge_json(dest, src):
 
     return dest
 
-def connect_db():
+def normalize(node):
     '''
-    DB(現状はSQLite3)に接続します。DB Objectを返す
-    (無かったら、Schemaから勝手に初期化・生成します)
-
-    @return: DB.
+    - datetime.datetime --> integer (milli-sec unixtime)
     '''
-    global _schema
-    db_dir = os.path.join(_DATA_DIR)
-    db_path = os.path.join(db_dir, u'sqlite.db')
-
-    # あれば読む. 無ければ勝手に作られる.
-    db = sqlite3.connect(db_path)
-
-    # 新しいテーブルがあるかもなので、毎回schema実施.
-    if not _schema:
-        with codecs.open(_SCHEMA_PATH, 'r', 'utf-8') as f:
-            _schema = f.read()
-    db.cursor().executescript(_schema)
-
-    return db
-_schema = None
+    if isinstance(node, list):
+        for i, child in enumerate(node):
+            new_child = normalize(child)
+            node[i] = new_child
+    
+    elif isinstance(node, dict):
+        for k, v in node.items():
+            new_child = normalize(v)
+            node[k] = new_child
+    
+    elif isinstance(node, datetime.datetime):
+        timestamp = int(time.mktime(node.timetuple()) * 1000)
+        return timestamp
+    
+    return node
 
