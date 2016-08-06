@@ -21,7 +21,7 @@
     "url": "https://github.com/megmogmog1965/awscostchart/issues"
   },
   "dependencies": {
-    "highcharts": "^4.2.5"
+    "highcharts": "^4.2.6"
   },
   "devDependencies": {
     "browserify": "^13.0.1",

@@ -1,5 +1,6 @@
 /// <reference path="globals/crossroads/index.d.ts" />
 /// <reference path="globals/hasher/index.d.ts" />
+/// <reference path="globals/highcharts/index.d.ts" />
 /// <reference path="globals/jquery/index.d.ts" />
 /// <reference path="globals/js-signals/index.d.ts" />
 /// <reference path="globals/node/index.d.ts" />
