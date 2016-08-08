@@ -115,10 +115,40 @@ def post_awskey():
     
     return jsonify(name=name, aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key)
 
-def _fetch_billings_every_day(hour=7, minute=3, second=0):
+def _fetch_billings_every_day(hour=14, minute=0, second=0):
     '''
     start daemon thread to fetch aws-billing.
     '''
+    def _exec():
+        func_pairs = [
+            [ CostStore.putAwsDataTransfer, u'AWSDataTransfer' ],
+            [ CostStore.putAwsQueueService, u'AWSQueueService' ],
+            [ CostStore.putAmazonEC2, u'AmazonEC2' ],
+            [ CostStore.putAmazonES, u'AmazonES' ],
+            [ CostStore.putAmazonElastiCache, u'AmazonElastiCache' ],
+            [ CostStore.putAmazonRDS, u'AmazonRDS' ],
+            [ CostStore.putAmazonRoute53, u'AmazonRoute53' ],
+            [ CostStore.putAmazonS3, u'AmazonS3' ],
+            [ CostStore.putAmazonSNS, u'AmazonSNS' ],
+            [ CostStore.putAwskms, u'awskms' ]
+        ]
+        
+        # update db.
+        for key in map(lambda k: Dot(k), AwsKeyStore.keys()):
+            # fetch.
+            o = aws_billing(key.aws_access_key_id, key.aws_secret_access_key)
+            res = o.estimated_charge()
+            
+            for f, name in func_pairs:
+                if not name in res or not res[name]:
+                    continue
+                
+                data = Dot(res[name])
+                f(key.aws_access_key_id, data.Maximum, data.Timestamp)
+        
+        logger.info(u'called aws clougwatch api.')
+        _fetch_billings_every_day(hour, minute, second) # call recursively.
+    
     # next 23:00.
     now = datetime.datetime.utcnow()
     today = datetime.datetime(now.year, now.month, now.day, hour, minute, second)
@@ -127,35 +157,7 @@ def _fetch_billings_every_day(hour=7, minute=3, second=0):
     sec = sec if sec > 0 else int((tommorow - now).total_seconds())
     
     # start next one.
-    threading.Timer(sec, _fetch_billings_every_day).start()
-    
-    func_pairs = [
-        [ CostStore.putAwsDataTransfer, u'AWSDataTransfer' ],
-        [ CostStore.putAwsQueueService, u'AWSQueueService' ],
-        [ CostStore.putAmazonEC2, u'AmazonEC2' ],
-        [ CostStore.putAmazonES, u'AmazonES' ],
-        [ CostStore.putAmazonElastiCache, u'AmazonElastiCache' ],
-        [ CostStore.putAmazonRDS, u'AmazonRDS' ],
-        [ CostStore.putAmazonRoute53, u'AmazonRoute53' ],
-        [ CostStore.putAmazonS3, u'AmazonS3' ],
-        [ CostStore.putAmazonSNS, u'AmazonSNS' ],
-        [ CostStore.putAwskms, u'awskms' ]
-    ]
-    
-    # update db.
-    for key in map(lambda k: Dot(k), AwsKeyStore.keys()):
-        # fetch.
-        o = aws_billing(key.aws_access_key_id, key.aws_secret_access_key)
-        res = o.estimated_charge()
-        
-        for f, name in func_pairs:
-            if not name in res or not res[name]:
-                continue
-            
-            data = Dot(res[name])
-            f(key.aws_access_key_id, data.Maximum, data.Timestamp)
-    
-    logger.info(u'called aws clougwatch api.')
+    threading.Timer(sec, _exec).start()
     logger.info(u'scheduled next after (sec): %s' % (sec))
 
 
