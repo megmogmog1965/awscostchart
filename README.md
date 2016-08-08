@@ -23,16 +23,16 @@ curl -XPOST -H 'Content-type: application/json' -d '
   "aws_access_key_id": "YOUR AWS ACCESS KEY ID",
   "aws_secret_access_key": "YOUR AWS SECRET KEY",
   "name": "DISPLAY NAME"
-}' http://localhost:5000/apis/awskeys
+}' http://localhost:5001/apis/awskeys
 ```
 
 Access charts.
 
-* http://localhost:5000/
+* http://localhost:5001/
 
 See apis.
 
-* http://localhost:5000/apis/
+* http://localhost:5001/apis/
 
 ## Author
 
