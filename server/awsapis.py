@@ -39,8 +39,6 @@ def aws_billing(aws_access_key_id, aws_secret_access_key):
 
 class _AwsApis(object):
     
-    _latest_data = {}
-    
     def __init__(self, aws_access_key_id, aws_secret_access_key):
         self._aws_access_key_id = aws_access_key_id
         self._aws_secret_access_key = aws_secret_access_key
@@ -60,14 +58,8 @@ class _AwsApis(object):
         return self._all_costs()
     
     def _all_costs(self):
-        # :todo: check...?
-        if _AwsApis._latest_data:
-            return _AwsApis._latest_data
-        
-        # communicate.
-        _AwsApis._latest_data = dict((name, self._service_cost_of_latest(name)) for name in _SERVICES)
-        
-        return _AwsApis._latest_data
+        service_costs = dict((name, self._service_cost_of_latest(name)) for name in _SERVICES)
+        return service_costs
     
     def _service_cost_of_latest(self, service_name):
         # connection.

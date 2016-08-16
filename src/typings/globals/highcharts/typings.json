@@ -1,8 +1,8 @@
 {
   "resolution": "main",
   "tree": {
-    "src": "https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/daf6eb644a6b3db8639e09e536397b6a197b0833/highcharts/highcharts.d.ts",
-    "raw": "registry:dt/highcharts#4.2.5+20160805111455",
-    "typings": "https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/daf6eb644a6b3db8639e09e536397b6a197b0833/highcharts/highcharts.d.ts"
+    "src": "https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/bd25423b260c565d60a65e16300bbaf40ac231c4/highcharts/highcharts.d.ts",
+    "raw": "registry:dt/highcharts#4.2.5+20160815203617",
+    "typings": "https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/bd25423b260c565d60a65e16300bbaf40ac231c4/highcharts/highcharts.d.ts"
   }
 }

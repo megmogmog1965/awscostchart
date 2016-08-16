@@ -6,14 +6,17 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import * as crossroads from 'crossroads';
 import * as hasher from 'hasher';
-import * as Constants from './Constants';
 
 import { hasSession } from './Utils';
+import { EstimatedCharge } from '../EstimatedCharge';
+import { Monthly } from '../Monthly';
 
 
 export function startRouting() {
-  // index.
-  //crossroads.addRoute('', () => _sessionRequired(<Index />));
+  // pages.
+  crossroads.addRoute('', () => _publicPage(<EstimatedCharge />));
+  crossroads.addRoute('/estimated_charge', () => _publicPage(<EstimatedCharge />));
+  crossroads.addRoute('/monthly', () => _publicPage(<Monthly />));
 
   // routed.
   crossroads.routed.add(request => {

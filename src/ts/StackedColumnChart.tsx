@@ -14,9 +14,9 @@ export interface Props {
   estimatedCharge: Types.TEstimatedCharge;
 }
 
-export class Chart extends React.Component<Props, State> {
+export class StackedColumnChart extends React.Component<Props, State> {
 
-  private _id: string = 'Chart_' + Math.random();
+  private _id: string = 'StackedColumnChart_' + Math.random();
 
   constructor() {
     super();
@@ -45,14 +45,13 @@ export class Chart extends React.Component<Props, State> {
    * @param data: [ [ unixtime, value ], ... ]
    */
   private _render_highcharts(data): void {
-    let elmId = 'chartelm_' + this._id;
+    let elmId = 'stackedcolumnchartelm_' + this._id;
     let element = React.createElement('div', { id: elmId });
     ReactDOM.render(element, document.getElementById(this._id), () => {
       // addFunnel(Highcharts);
       Highcharts.chart(elmId, {
         chart: {
-            // type: 'spline'
-            type: 'area'
+            type: 'column'
         },
         title: {
             text: this.props.title
@@ -87,17 +86,15 @@ export class Chart extends React.Component<Props, State> {
             pointFormat: '{point.x:%e. %b, %Y}: {point.y:.0f} USD'
         },
         plotOptions: {
-            // spline: {
-            //     marker: {
-            //         enabled: false
-            //     }
-            // }
-            area: {
+            column: {
                 stacking: 'normal',
-                lineColor: '#666666',
-                lineWidth: 1,
-                marker: {
-                    enabled: false
+                dataLabels: {
+                    enabled: true,
+                    // color: (Highcharts.theme && Highcharts.theme.dataLabelsColor) || 'white',
+                    color: 'white',
+                    style: {
+                        textShadow: '0 0 3px black'
+                    }
                 }
             }
         },
@@ -119,7 +116,7 @@ export class Chart extends React.Component<Props, State> {
 
   render () {
     return (
-      <div className='Chart chart'>
+      <div className='StackedColumnChart chart'>
         <div id={ this._id } style={ { width: '100%' } }></div>
       </div>
     );

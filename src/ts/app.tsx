@@ -1,10 +1,5 @@
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
-
-import { Main } from './Main';
+import { startRouting } from './classes/Router';
 
 
-ReactDOM.render(
-  <Main />,
-  document.getElementById('react-content')
-);
+// start crossroads routing.
+startRouting();

@@ -13,7 +13,6 @@ import threading
 
 # installed modules.
 from flask import Flask
-from flask import request
 from flask import jsonify
 from flask_autodoc.autodoc import Autodoc
 
@@ -21,9 +20,11 @@ from flask_autodoc.autodoc import Autodoc
 from server.awsapis import aws_billing
 from server.http_error import _HttpError
 from server.store.costs import CostStore
+from server.store.costs import MonthlyCostStore
 from server.store.awskeys import AwsKeyStore
 from server.util import Dot
 from server.util import normalize
+from server.util import json_params
 from server.logger import logger
 
 
@@ -60,21 +61,53 @@ def apidocs():
 @app.route('/apis/estimated_charge', methods=['GET'])
 def get_estimated_charge():
     '''
-    get comments.
+    get estimated charge.
     '''
     ret = {}
     
+    store = CostStore()
     func_pairs = [
-        [ CostStore.awsDataTransfer, u'AWSDataTransfer' ],
-        [ CostStore.awsQueueService, u'AWSQueueService' ],
-        [ CostStore.amazonEC2, u'AmazonEC2' ],
-        [ CostStore.amazonES, u'AmazonES' ],
-        [ CostStore.amazonElastiCache, u'AmazonElastiCache' ],
-        [ CostStore.amazonRDS, u'AmazonRDS' ],
-        [ CostStore.amazonRoute53, u'AmazonRoute53' ],
-        [ CostStore.amazonS3, u'AmazonS3' ],
-        [ CostStore.amazonSNS, u'AmazonSNS' ],
-        [ CostStore.awskms, u'awskms' ]
+        [ store.awsDataTransfer, u'AWSDataTransfer' ],
+        [ store.awsQueueService, u'AWSQueueService' ],
+        [ store.amazonEC2, u'AmazonEC2' ],
+        [ store.amazonES, u'AmazonES' ],
+        [ store.amazonElastiCache, u'AmazonElastiCache' ],
+        [ store.amazonRDS, u'AmazonRDS' ],
+        [ store.amazonRoute53, u'AmazonRoute53' ],
+        [ store.amazonS3, u'AmazonS3' ],
+        [ store.amazonSNS, u'AmazonSNS' ],
+        [ store.awskms, u'awskms' ]
+    ]
+    
+    for key in map(lambda k: Dot(k), AwsKeyStore.keys()):
+        part = {}
+        for f, name in func_pairs:
+            data = f(key.aws_access_key_id)
+            part[name] = data
+        ret[key.aws_access_key_id] = part
+    
+    return jsonify(**normalize(ret))
+
+@auto.doc()
+@app.route('/apis/monthly', methods=['GET'])
+def get_monthly():
+    '''
+    get monthly costs.
+    '''
+    ret = {}
+    
+    store = MonthlyCostStore(CostStore())
+    func_pairs = [
+        [ store.awsDataTransfer, u'AWSDataTransfer' ],
+        [ store.awsQueueService, u'AWSQueueService' ],
+        [ store.amazonEC2, u'AmazonEC2' ],
+        [ store.amazonES, u'AmazonES' ],
+        [ store.amazonElastiCache, u'AmazonElastiCache' ],
+        [ store.amazonRDS, u'AmazonRDS' ],
+        [ store.amazonRoute53, u'AmazonRoute53' ],
+        [ store.amazonS3, u'AmazonS3' ],
+        [ store.amazonSNS, u'AmazonSNS' ],
+        [ store.awskms, u'awskms' ]
     ]
     
     for key in map(lambda k: Dot(k), AwsKeyStore.keys()):
@@ -103,22 +136,51 @@ def post_awskey():
       "name": "...",
       "aws_access_key_id": "...",
       "aws_secret_access_key": "..."
-    } 
+    }
     '''
-    body = request.json
-    name = body[u'name']
-    aws_access_key_id = body[u'aws_access_key_id']
-    aws_secret_access_key = body[u'aws_secret_access_key']
+    name, aws_access_key_id, aws_secret_access_key = json_params(
+        u'name', u'aws_access_key_id', u'aws_secret_access_key')
     
     # update db.
     AwsKeyStore.putKey(name, aws_access_key_id, aws_secret_access_key)
     
     return jsonify(name=name, aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key)
 
-def _fetch_billings_every_day(hour=7, minute=3, second=0):
+def _fetch_billings_every_day(hour=14, minute=0, second=0):
     '''
     start daemon thread to fetch aws-billing.
     '''
+    def _exec():
+        store = CostStore()
+        func_pairs = [
+            [ store.putAwsDataTransfer, u'AWSDataTransfer' ],
+            [ store.putAwsQueueService, u'AWSQueueService' ],
+            [ store.putAmazonEC2, u'AmazonEC2' ],
+            [ store.putAmazonES, u'AmazonES' ],
+            [ store.putAmazonElastiCache, u'AmazonElastiCache' ],
+            [ store.putAmazonRDS, u'AmazonRDS' ],
+            [ store.putAmazonRoute53, u'AmazonRoute53' ],
+            [ store.putAmazonS3, u'AmazonS3' ],
+            [ store.putAmazonSNS, u'AmazonSNS' ],
+            [ store.putAwskms, u'awskms' ]
+        ]
+        
+        # update db.
+        for key in map(lambda k: Dot(k), AwsKeyStore.keys()):
+            # fetch.
+            o = aws_billing(key.aws_access_key_id, key.aws_secret_access_key)
+            res = o.estimated_charge()
+            
+            for f, name in func_pairs:
+                if not name in res or not res[name]:
+                    continue
+                
+                data = Dot(res[name])
+                f(key.aws_access_key_id, data.Maximum, data.Timestamp)
+        
+        logger.info(u'called aws clougwatch api.')
+        _fetch_billings_every_day(hour, minute, second) # call recursively.
+    
     # next 23:00.
     now = datetime.datetime.utcnow()
     today = datetime.datetime(now.year, now.month, now.day, hour, minute, second)
@@ -127,35 +189,7 @@ def _fetch_billings_every_day(hour=7, minute=3, second=0):
     sec = sec if sec > 0 else int((tommorow - now).total_seconds())
     
     # start next one.
-    threading.Timer(sec, _fetch_billings_every_day).start()
-    
-    func_pairs = [
-        [ CostStore.putAwsDataTransfer, u'AWSDataTransfer' ],
-        [ CostStore.putAwsQueueService, u'AWSQueueService' ],
-        [ CostStore.putAmazonEC2, u'AmazonEC2' ],
-        [ CostStore.putAmazonES, u'AmazonES' ],
-        [ CostStore.putAmazonElastiCache, u'AmazonElastiCache' ],
-        [ CostStore.putAmazonRDS, u'AmazonRDS' ],
-        [ CostStore.putAmazonRoute53, u'AmazonRoute53' ],
-        [ CostStore.putAmazonS3, u'AmazonS3' ],
-        [ CostStore.putAmazonSNS, u'AmazonSNS' ],
-        [ CostStore.putAwskms, u'awskms' ]
-    ]
-    
-    # update db.
-    for key in map(lambda k: Dot(k), AwsKeyStore.keys()):
-        # fetch.
-        o = aws_billing(key.aws_access_key_id, key.aws_secret_access_key)
-        res = o.estimated_charge()
-        
-        for f, name in func_pairs:
-            if not name in res or not res[name]:
-                continue
-            
-            data = Dot(res[name])
-            f(key.aws_access_key_id, data.Maximum, data.Timestamp)
-    
-    logger.info(u'called aws clougwatch api.')
+    threading.Timer(sec, _exec).start()
     logger.info(u'scheduled next after (sec): %s' % (sec))
 
 
@@ -164,4 +198,4 @@ if __name__ == '__main__':
     _fetch_billings_every_day()
     
     # :see: http://askubuntu.com/questions/224392/how-to-allow-remote-connections-to-flask
-    app.run(host='0.0.0.0', port=5000, threaded=True, use_reloader=False)
+    app.run(host='0.0.0.0', port=5001, threaded=True, use_reloader=False)
