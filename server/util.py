@@ -16,10 +16,10 @@ import tempfile
 import datetime
 
 # installed modules.
-pass
+from flask import request
 
 # my modules.
-pass
+from http_error import make_httperror
 
 
 class TempDir(object):
@@ -145,3 +145,20 @@ def normalize(node):
     
     return node
 
+def json_params(*keys, **default_values):
+    '''
+    :param key: 
+    :param default_value: 
+    :return: 
+    :raise http_error._HttpError: 
+    '''
+    params = request.json
+    
+    missing_keys = filter(lambda k: not k in params, keys)
+    if missing_keys:
+        raise make_httperror(404, u'missing query params: %s' % (missing_keys))
+    
+    part1 = map(lambda k: params[k], keys)
+    part2 = map(lambda k: params[k] if k in params else default_values[k], default_values)
+    
+    return part1 + part2

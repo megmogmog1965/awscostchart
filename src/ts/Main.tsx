@@ -5,10 +5,12 @@ import * as $ from 'jquery';
 import * as Types from './classes/Types';
 import { bindPrivateMethods } from './classes/Utils';
 import { Chart } from './Chart';
+import { StackedColumnChart } from './StackedColumnChart';
 
 
 export interface State {
   charges: TCharges;
+  monthlyCharges: TCharges;
   awskeys: Types.TAwsCredential[];
 }
 
@@ -26,7 +28,7 @@ export class Main extends React.Component<Props, State> {
   }
 
   componentWillMount() {
-    this.state = { charges: {}, awskeys: [] };
+    this.state = { charges: {}, monthlyCharges: {}, awskeys: [] };
   }
 
   componentDidMount() {
@@ -64,10 +66,24 @@ export class Main extends React.Component<Props, State> {
       });
     });
 
-    Promise.all([ p1, p2 ]).then(
+    let p3 = new Promise((resolve, reject) => {
+      $.ajax({
+      url: '/apis/monthly',
+      dataType: 'json'
+      })
+      .done((charges: TCharges) => {
+        resolve(charges);
+      })
+      .fail((reason) => {
+        reject(reason);
+      });
+    });
+
+    Promise.all([ p1, p2, p3 ]).then(
       (data: any[]) => {
         this.state.awskeys = data[0];
         this.state.charges = data[1];
+        this.state.monthlyCharges = data[2];
         this.setState(this.state);
       },
       (reason) => {
@@ -81,6 +97,10 @@ export class Main extends React.Component<Props, State> {
       <div className='Main'>
       {
         this.state.awskeys.map((key) => <Chart title={ key.name } estimatedCharge={ this.state.charges[key.aws_access_key_id] } />)
+      }
+      {
+        this.state.awskeys.map((key) => <StackedColumnChart title={ key.name }
+        estimatedCharge={ this.state.monthlyCharges[key.aws_access_key_id] } />)
       }
       </div>
     );
