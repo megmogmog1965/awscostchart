@@ -116,7 +116,7 @@ export class StackedColumnChart extends React.Component<Props, State> {
 
   render () {
     return (
-      <div className='StackedColumnChart'>
+      <div className='StackedColumnChart chart'>
         <div id={ this._id } style={ { width: '100%' } }></div>
       </div>
     );

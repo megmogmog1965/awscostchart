@@ -4,13 +4,12 @@ import * as $ from 'jquery';
 
 import * as Types from './classes/Types';
 import { bindPrivateMethods } from './classes/Utils';
+import { Header } from './Header';
 import { Chart } from './Chart';
-import { StackedColumnChart } from './StackedColumnChart';
 
 
 export interface State {
   charges: TCharges;
-  monthlyCharges: TCharges;
   awskeys: Types.TAwsCredential[];
 }
 
@@ -20,7 +19,7 @@ interface TCharges {
   [accesskeyid: string]: Types.TEstimatedCharge;
 }
 
-export class Main extends React.Component<Props, State> {
+export class EstimatedCharge extends React.Component<Props, State> {
 
   constructor() {
     super();
@@ -28,7 +27,7 @@ export class Main extends React.Component<Props, State> {
   }
 
   componentWillMount() {
-    this.state = { charges: {}, monthlyCharges: {}, awskeys: [] };
+    this.state = { charges: {}, awskeys: [] };
   }
 
   componentDidMount() {
@@ -66,24 +65,10 @@ export class Main extends React.Component<Props, State> {
       });
     });
 
-    let p3 = new Promise((resolve, reject) => {
-      $.ajax({
-      url: '/apis/monthly',
-      dataType: 'json'
-      })
-      .done((charges: TCharges) => {
-        resolve(charges);
-      })
-      .fail((reason) => {
-        reject(reason);
-      });
-    });
-
-    Promise.all([ p1, p2, p3 ]).then(
+    Promise.all([ p1, p2 ]).then(
       (data: any[]) => {
         this.state.awskeys = data[0];
         this.state.charges = data[1];
-        this.state.monthlyCharges = data[2];
         this.setState(this.state);
       },
       (reason) => {
@@ -94,14 +79,14 @@ export class Main extends React.Component<Props, State> {
 
   render () {
     return (
-      <div className='Main'>
-      {
-        this.state.awskeys.map((key) => <Chart title={ key.name } estimatedCharge={ this.state.charges[key.aws_access_key_id] } />)
-      }
-      {
-        this.state.awskeys.map((key) => <StackedColumnChart title={ key.name }
-        estimatedCharge={ this.state.monthlyCharges[key.aws_access_key_id] } />)
-      }
+      <div className='EstimatedCharge'>
+        <Header />
+        <div className='content'>
+          <h1>Estimated Charge</h1>
+          {
+            this.state.awskeys.map((key) => <Chart title={ key.name } estimatedCharge={ this.state.charges[key.aws_access_key_id] } />)
+          }
+        </div>
       </div>
     );
   }

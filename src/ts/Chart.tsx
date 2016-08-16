@@ -119,7 +119,7 @@ export class Chart extends React.Component<Props, State> {
 
   render () {
     return (
-      <div className='Chart'>
+      <div className='Chart chart'>
         <div id={ this._id } style={ { width: '100%' } }></div>
       </div>
     );
