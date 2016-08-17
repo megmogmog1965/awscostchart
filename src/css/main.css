@@ -1,13 +1,19 @@
 body {
   position: relative;
+  background-color: #3CB2D0;
+  color: #ffffff;
   margin: 0;
   padding: 0;
-  background-color: #3CB2D0;
+}
+
+.content {
+  margin: 2.5em 0 0 0; /* for fixed HEADER */
+  padding: 0;
 }
 
 /* Style The Dropdown Button */
 .dropbtn {
-  padding: 0.5em;
+  padding: 0.4em;
   font-size: 1em;
   cursor: pointer;
 }
@@ -51,23 +57,45 @@ body {
   /*background-color: #3e8e41;*/
 }
 
-.Header {
-  positotion: relative;
-  padding: 0 4em;
-  border-bottom: solid 2px #ffffff;
-  /*background-color: white;*/
+div.Header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  width: 100%;
+  height: 2.5em;
+  /*border-top: solid 0.2em #3CB2D0;*/
+  background-color: white;
+  color: #3CB2D0;
 }
 
-.Header .dropbtn {
-  /*
-  background: #ffffff;
-  color: #3CB2D0;
-  */
+div.Header .left-align {
+  position: absolute;
+  left: 0;
+  padding-left: 1em;
+}
 
-  padding: 0.5em 1em;
-  border-left: dotted 1px #ffffff;
-  border-right: dotted 1px #ffffff;
-  color: #ffffff;
+div.Header .right-align {
+  position: absolute;
+  right: 0;
+  padding-right: 1em;
+}
+
+div.Header .v-align-middle {
+  display: table-cell;
+  vertical-align: middle;
+  height: 2.5em;
+}
+
+div.Header a {
+  color: #3CB2D0;
+  text-decoration: none;
+}
+
+div.Header .dropbtn {
+  border-left: dotted 1px #3CB2D0;
+  border-right: dotted 1px #3CB2D0;
+  color: #3CB2D0;
 }
 
 .content {
