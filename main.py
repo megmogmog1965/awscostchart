@@ -65,24 +65,24 @@ def get_estimated_charge():
     '''
     ret = {}
     
-    store = CostStore()
-    func_pairs = [
-        [ store.awsDataTransfer, u'AWSDataTransfer' ],
-        [ store.awsQueueService, u'AWSQueueService' ],
-        [ store.amazonEC2, u'AmazonEC2' ],
-        [ store.amazonES, u'AmazonES' ],
-        [ store.amazonElastiCache, u'AmazonElastiCache' ],
-        [ store.amazonRDS, u'AmazonRDS' ],
-        [ store.amazonRoute53, u'AmazonRoute53' ],
-        [ store.amazonS3, u'AmazonS3' ],
-        [ store.amazonSNS, u'AmazonSNS' ],
-        [ store.awskms, u'awskms' ]
-    ]
-    
     for key in map(lambda k: Dot(k), AwsKeyStore.keys()):
+        store = CostStore(key.aws_access_key_id)
+        func_pairs = [
+            [ store.awsDataTransfer, u'AWSDataTransfer' ],
+            [ store.awsQueueService, u'AWSQueueService' ],
+            [ store.amazonEC2, u'AmazonEC2' ],
+            [ store.amazonES, u'AmazonES' ],
+            [ store.amazonElastiCache, u'AmazonElastiCache' ],
+            [ store.amazonRDS, u'AmazonRDS' ],
+            [ store.amazonRoute53, u'AmazonRoute53' ],
+            [ store.amazonS3, u'AmazonS3' ],
+            [ store.amazonSNS, u'AmazonSNS' ],
+            [ store.awskms, u'awskms' ]
+        ]
+        
         part = {}
         for f, name in func_pairs:
-            data = f(key.aws_access_key_id)
+            data = f()
             part[name] = data
         ret[key.aws_access_key_id] = part
     
@@ -96,24 +96,24 @@ def get_monthly():
     '''
     ret = {}
     
-    store = MonthlyCostStore(CostStore())
-    func_pairs = [
-        [ store.awsDataTransfer, u'AWSDataTransfer' ],
-        [ store.awsQueueService, u'AWSQueueService' ],
-        [ store.amazonEC2, u'AmazonEC2' ],
-        [ store.amazonES, u'AmazonES' ],
-        [ store.amazonElastiCache, u'AmazonElastiCache' ],
-        [ store.amazonRDS, u'AmazonRDS' ],
-        [ store.amazonRoute53, u'AmazonRoute53' ],
-        [ store.amazonS3, u'AmazonS3' ],
-        [ store.amazonSNS, u'AmazonSNS' ],
-        [ store.awskms, u'awskms' ]
-    ]
-    
     for key in map(lambda k: Dot(k), AwsKeyStore.keys()):
+        store = MonthlyCostStore(CostStore(key.aws_access_key_id))
+        func_pairs = [
+            [ store.awsDataTransfer, u'AWSDataTransfer' ],
+            [ store.awsQueueService, u'AWSQueueService' ],
+            [ store.amazonEC2, u'AmazonEC2' ],
+            [ store.amazonES, u'AmazonES' ],
+            [ store.amazonElastiCache, u'AmazonElastiCache' ],
+            [ store.amazonRDS, u'AmazonRDS' ],
+            [ store.amazonRoute53, u'AmazonRoute53' ],
+            [ store.amazonS3, u'AmazonS3' ],
+            [ store.amazonSNS, u'AmazonSNS' ],
+            [ store.awskms, u'awskms' ]
+        ]
+        
         part = {}
         for f, name in func_pairs:
-            data = f(key.aws_access_key_id)
+            data = f()
             part[name] = data
         ret[key.aws_access_key_id] = part
     
@@ -151,32 +151,32 @@ def _fetch_billings_every_day(hour=14, minute=0, second=0):
     start daemon thread to fetch aws-billing.
     '''
     def _exec():
-        store = CostStore()
-        func_pairs = [
-            [ store.putAwsDataTransfer, u'AWSDataTransfer' ],
-            [ store.putAwsQueueService, u'AWSQueueService' ],
-            [ store.putAmazonEC2, u'AmazonEC2' ],
-            [ store.putAmazonES, u'AmazonES' ],
-            [ store.putAmazonElastiCache, u'AmazonElastiCache' ],
-            [ store.putAmazonRDS, u'AmazonRDS' ],
-            [ store.putAmazonRoute53, u'AmazonRoute53' ],
-            [ store.putAmazonS3, u'AmazonS3' ],
-            [ store.putAmazonSNS, u'AmazonSNS' ],
-            [ store.putAwskms, u'awskms' ]
-        ]
-        
         # update db.
         for key in map(lambda k: Dot(k), AwsKeyStore.keys()):
             # fetch.
             o = aws_billing(key.aws_access_key_id, key.aws_secret_access_key)
             res = o.estimated_charge()
             
+            store = CostStore(key.aws_access_key_id)
+            func_pairs = [
+                [ store.putAwsDataTransfer, u'AWSDataTransfer' ],
+                [ store.putAwsQueueService, u'AWSQueueService' ],
+                [ store.putAmazonEC2, u'AmazonEC2' ],
+                [ store.putAmazonES, u'AmazonES' ],
+                [ store.putAmazonElastiCache, u'AmazonElastiCache' ],
+                [ store.putAmazonRDS, u'AmazonRDS' ],
+                [ store.putAmazonRoute53, u'AmazonRoute53' ],
+                [ store.putAmazonS3, u'AmazonS3' ],
+                [ store.putAmazonSNS, u'AmazonSNS' ],
+                [ store.putAwskms, u'awskms' ]
+            ]
+            
             for f, name in func_pairs:
                 if not name in res or not res[name]:
                     continue
                 
                 data = Dot(res[name])
-                f(key.aws_access_key_id, data.Maximum, data.Timestamp)
+                f(data.Maximum, data.Timestamp)
         
         logger.info(u'called aws clougwatch api.')
         _fetch_billings_every_day(hour, minute, second) # call recursively.
