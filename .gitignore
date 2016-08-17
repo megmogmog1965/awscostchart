@@ -2,6 +2,7 @@ node_modules/
 .settings/
 .DS_Store
 db.json
+*.db
 static/
 
 

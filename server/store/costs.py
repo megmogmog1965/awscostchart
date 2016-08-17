@@ -12,10 +12,7 @@ import calendar
 import datetime
 
 # my modules.
-from server.store import _db
-
-# installed modules.
-from tinydb.queries import Query
+from server.util import connect_db
 
 
 class CostStore(object):
@@ -130,15 +127,26 @@ class CostStore(object):
         return self._put_daily_data(u'awskms', aws_access_key_id, value, timestamp)
     
     
-    def _get_all(self, table_name, aws_access_key_id):
-        Cost = Query()
-        raw = _db.table(table_name).search(Cost.aws_access_key_id == aws_access_key_id)
-        return map(lambda d: dict(d, timestamp=datetime.datetime.utcfromtimestamp(d[u'timestamp'])), raw)
+    def _get_all(self, service_name, aws_access_key_id):
+        with connect_db() as db:
+            cursor = db.cursor()
+            cursor.execute(
+                u'select aws_access_key_id, timestamp, value from service_costs where service_name=? and aws_access_key_id=? order by timestamp',
+                (service_name, aws_access_key_id, ))
+            mid = [ {
+                    u'aws_access_key_id': row[0],
+                    u'timestamp': row[1],
+                    u'value': row[2]
+                } for row in cursor.fetchall() ]
+        
+        ret = map(lambda d: dict(d, timestamp=datetime.datetime.utcfromtimestamp(d[u'timestamp'])), mid)
+        return ret
     
-    def _put_daily_data(self, table_name, aws_access_key_id, value, timestamp):
-#         :todo: aws_access_key_id
+    def _put_daily_data(self, service_name, aws_access_key_id, value, timestamp):
         unixtime = calendar.timegm(timestamp.utctimetuple())
-        return _db.table(table_name).insert({ u'aws_access_key_id': aws_access_key_id, u'value': value, u'timestamp': unixtime })
+        with connect_db() as db:
+            db.execute(u'insert into service_costs values (null, ?, ?, ?, ?)', (service_name, aws_access_key_id, unixtime, value, ))
+            db.commit()
 
 
 class MonthlyCostStore(object):

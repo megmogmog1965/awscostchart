@@ -12,6 +12,8 @@ import os
 import copy
 import time
 import shutil
+import codecs
+import sqlite3
 import tempfile
 import datetime
 
@@ -61,6 +63,15 @@ class Dot(object):
 def root_dir():
     parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     return to_unicode(parent_dir)
+
+def resource_dir():
+    return os.path.join(root_dir(), u'resources')
+
+def data_dir():
+    dirpath = os.path.join(root_dir(), u'data')
+    if not os.path.isdir(dirpath):
+        os.mkdir(dirpath)
+    return dirpath
 
 def to_unicode(encodedStr):
     ''' an unicode-str. '''
@@ -162,3 +173,65 @@ def json_params(*keys, **default_values):
     part2 = map(lambda k: params[k] if k in params else default_values[k], default_values)
     
     return part1 + part2
+
+def connect_db():
+    '''
+    DB(現状はSQLite3)に接続します。DB Objectを返す
+    (無かったら、Schemaから勝手に初期化・生成します)
+
+    @return: DB.
+    '''
+    global _schema
+    db_path = os.path.join(data_dir(), u'sqlite.db')
+
+    # あれば読む. 無ければ勝手に作られる.
+    db = sqlite3.connect(db_path)
+
+    # 新しいテーブルがあるかもなので、毎回schema実施.
+    if not _schema:
+        schema_path = os.path.join(resource_dir(), u'schema.sql')
+        with codecs.open(schema_path, 'r', 'utf-8') as f:
+            _schema = f.read()
+    db.cursor().executescript(_schema)
+
+    return db
+_schema = None
+
+def __convert_oldjsondb_into_sqlitedb():
+    '''
+    convert old json.db (tinydb) to sqlite3.
+    '''
+    with codecs.open(os.path.join(root_dir(), u'db.json'), 'r', 'utf-8') as f:
+        import json
+        json_data = json.load(f)
+    
+    # awskeys.
+    awskeys = [ json_data[u'awskeys'][key] for key in sorted(json_data[u'awskeys'].keys()) ]
+    print awskeys
+    
+    # service costs.
+    service_costs = []
+    for service_name in [ u'AmazonES', u'AmazonRoute53', u'AmazonEC2', u'AWSDataTransfer', u'awskms', u'AmazonElastiCache', u'AmazonRDS', u'AmazonSNS', u'AmazonS3', u'AWSQueueService' ]:
+        part = [ json_data[service_name][key] for key in sorted(json_data[service_name].keys()) ]
+        part = map(lambda e: dict(e, service_name=service_name), part)
+        service_costs.extend(part)
+    service_costs = sorted(service_costs, key=lambda e: e[u'timestamp'])
+    print service_costs
+    
+    # write into db.
+    with connect_db() as db:
+        for obj in awskeys:
+            aws_access_key_id = obj[u'aws_access_key_id']
+            aws_secret_access_key = obj[u'aws_secret_access_key']
+            name = obj[u'name']
+            db.execute(u'insert into awskeys values (?, ?, ?)', (aws_access_key_id, aws_secret_access_key, name, ))
+        
+        for obj in service_costs:
+            service_name = obj[u'service_name']
+            aws_access_key_id = obj[u'aws_access_key_id']
+            timestamp = obj[u'timestamp']
+            value = obj[u'value']
+            db.execute(u'insert into service_costs values (null, ?, ?, ?, ?)', (service_name, aws_access_key_id, timestamp, value, ))
+        
+        db.commit()
+
