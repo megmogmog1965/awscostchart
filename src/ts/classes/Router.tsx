@@ -8,8 +8,10 @@ import * as crossroads from 'crossroads';
 import * as hasher from 'hasher';
 
 import { hasSession } from './Utils';
-import { EstimatedCharge } from '../EstimatedCharge';
-import { Monthly } from '../Monthly';
+import { EstimatedCharge } from '../jsx/EstimatedCharge';
+import { Monthly } from '../jsx/Monthly';
+
+import { AwsKeys } from '../jsx/AwsKeys';
 
 
 export function startRouting() {
@@ -17,6 +19,7 @@ export function startRouting() {
   crossroads.addRoute('', () => _publicPage(<EstimatedCharge />));
   crossroads.addRoute('/estimated_charge', () => _publicPage(<EstimatedCharge />));
   crossroads.addRoute('/monthly', () => _publicPage(<Monthly />));
+  crossroads.addRoute('/awskeys', () => _publicPage(<AwsKeys />));
 
   // routed.
   crossroads.routed.add(request => {

@@ -2,8 +2,8 @@ import * as React from 'react';
 import { Promise } from 'es6-promise';
 import * as $ from 'jquery';
 
-import * as Types from './classes/Types';
-import { bindPrivateMethods } from './classes/Utils';
+import * as Types from '../classes/Types';
+import { bindPrivateMethods } from '../classes/Utils';
 import { Header } from './Header';
 import { StackedColumnChart } from './StackedColumnChart';
 

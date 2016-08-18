@@ -12,10 +12,7 @@ import calendar
 import datetime
 
 # my modules.
-from server.store import _db
-
-# installed modules.
-from tinydb.queries import Query
+from server.util import connect_db
 
 
 class CostStore(object):
@@ -23,122 +20,133 @@ class CostStore(object):
     return & store estimated charge.
     '''
     
-    def __init__(self):
+    def __init__(self, aws_access_key_id):
         '''
         Constructor
         '''
-        pass
+        self._aws_access_key_id = aws_access_key_id
     
-    def awsDataTransfer(self, aws_access_key_id):
-        return self._get_all(u'AWSDataTransfer', aws_access_key_id)
+    def awsDataTransfer(self):
+        return self._get_all(u'AWSDataTransfer')
     
-    def putAwsDataTransfer(self, aws_access_key_id, value, timestamp):
+    def putAwsDataTransfer(self, value, timestamp):
         '''
         :param value: any value.
         :param datetime.datetime timestamp: timestamp.
         '''
-        return self._put_daily_data(u'AWSDataTransfer', aws_access_key_id, value, timestamp)
+        return self._put_daily_data(u'AWSDataTransfer', value, timestamp)
     
-    def awsQueueService(self, aws_access_key_id):
-        return self._get_all(u'AWSQueueService', aws_access_key_id)
+    def awsQueueService(self):
+        return self._get_all(u'AWSQueueService')
     
-    def putAwsQueueService(self, aws_access_key_id, value, timestamp):
+    def putAwsQueueService(self, value, timestamp):
         '''
         :param value: any value.
         :param datetime.datetime timestamp: timestamp.
         '''
-        return self._put_daily_data(u'AWSQueueService', aws_access_key_id, value, timestamp)
+        return self._put_daily_data(u'AWSQueueService', value, timestamp)
     
-    def amazonEC2(self, aws_access_key_id):
-        return self._get_all(u'AmazonEC2', aws_access_key_id)
+    def amazonEC2(self):
+        return self._get_all(u'AmazonEC2')
     
-    def putAmazonEC2(self, aws_access_key_id, value, timestamp):
+    def putAmazonEC2(self, value, timestamp):
         '''
         :param value: any value.
         :param datetime.datetime timestamp: timestamp.
         '''
-        return self._put_daily_data(u'AmazonEC2', aws_access_key_id, value, timestamp)
+        return self._put_daily_data(u'AmazonEC2', value, timestamp)
     
-    def amazonES(self, aws_access_key_id):
-        return self._get_all(u'AmazonES', aws_access_key_id)
+    def amazonES(self):
+        return self._get_all(u'AmazonES')
     
-    def putAmazonES(self, aws_access_key_id, value, timestamp):
+    def putAmazonES(self, value, timestamp):
         '''
         :param value: any value.
         :param datetime.datetime timestamp: timestamp.
         '''
-        return self._put_daily_data(u'AmazonES', aws_access_key_id, value, timestamp)
+        return self._put_daily_data(u'AmazonES', value, timestamp)
     
-    def amazonElastiCache(self, aws_access_key_id):
-        return self._get_all(u'AmazonElastiCache', aws_access_key_id)
+    def amazonElastiCache(self):
+        return self._get_all(u'AmazonElastiCache')
     
-    def putAmazonElastiCache(self, aws_access_key_id, value, timestamp):
+    def putAmazonElastiCache(self, value, timestamp):
         '''
         :param value: any value.
         :param datetime.datetime timestamp: timestamp.
         '''
-        return self._put_daily_data(u'AmazonElastiCache', aws_access_key_id, value, timestamp)
+        return self._put_daily_data(u'AmazonElastiCache', value, timestamp)
     
-    def amazonRDS(self, aws_access_key_id):
-        return self._get_all(u'AmazonRDS', aws_access_key_id)
+    def amazonRDS(self):
+        return self._get_all(u'AmazonRDS')
     
-    def putAmazonRDS(self, aws_access_key_id, value, timestamp):
+    def putAmazonRDS(self, value, timestamp):
         '''
         :param value: any value.
         :param datetime.datetime timestamp: timestamp.
         '''
-        return self._put_daily_data(u'AmazonRDS', aws_access_key_id, value, timestamp)
+        return self._put_daily_data(u'AmazonRDS', value, timestamp)
     
-    def amazonRoute53(self, aws_access_key_id):
-        return self._get_all(u'AmazonRoute53', aws_access_key_id)
+    def amazonRoute53(self):
+        return self._get_all(u'AmazonRoute53')
     
-    def putAmazonRoute53(self, aws_access_key_id, value, timestamp):
+    def putAmazonRoute53(self, value, timestamp):
         '''
         :param value: any value.
         :param datetime.datetime timestamp: timestamp.
         '''
-        return self._put_daily_data(u'AmazonRoute53', aws_access_key_id, value, timestamp)
+        return self._put_daily_data(u'AmazonRoute53', value, timestamp)
     
-    def amazonS3(self, aws_access_key_id):
-        return self._get_all(u'AmazonS3', aws_access_key_id)
+    def amazonS3(self):
+        return self._get_all(u'AmazonS3')
     
-    def putAmazonS3(self, aws_access_key_id, value, timestamp):
+    def putAmazonS3(self, value, timestamp):
         '''
         :param value: any value.
         :param datetime.datetime timestamp: timestamp.
         '''
-        return self._put_daily_data(u'AmazonS3', aws_access_key_id, value, timestamp)
+        return self._put_daily_data(u'AmazonS3', value, timestamp)
     
-    def amazonSNS(self, aws_access_key_id):
-        return self._get_all(u'AmazonSNS', aws_access_key_id)
+    def amazonSNS(self):
+        return self._get_all(u'AmazonSNS')
     
-    def putAmazonSNS(self, aws_access_key_id, value, timestamp):
+    def putAmazonSNS(self, value, timestamp):
         '''
         :param value: any value.
         :param datetime.datetime timestamp: timestamp.
         '''
-        return self._put_daily_data(u'AmazonSNS', aws_access_key_id, value, timestamp)
+        return self._put_daily_data(u'AmazonSNS', value, timestamp)
     
-    def awskms(self, aws_access_key_id):
-        return self._get_all(u'awskms', aws_access_key_id)
+    def awskms(self):
+        return self._get_all(u'awskms')
     
-    def putAwskms(self, aws_access_key_id, value, timestamp):
+    def putAwskms(self, value, timestamp):
         '''
         :param value: any value.
         :param datetime.datetime timestamp: timestamp.
         '''
-        return self._put_daily_data(u'awskms', aws_access_key_id, value, timestamp)
+        return self._put_daily_data(u'awskms', value, timestamp)
     
     
-    def _get_all(self, table_name, aws_access_key_id):
-        Cost = Query()
-        raw = _db.table(table_name).search(Cost.aws_access_key_id == aws_access_key_id)
-        return map(lambda d: dict(d, timestamp=datetime.datetime.utcfromtimestamp(d[u'timestamp'])), raw)
+    def _get_all(self, service_name):
+        with connect_db() as db:
+            cursor = db.cursor()
+            cursor.execute(
+                u'select aws_access_key_id, timestamp, value from service_costs where service_name=? and aws_access_key_id=? order by timestamp',
+                (service_name, self._aws_access_key_id, ))
+            mid = [ {
+                    u'aws_access_key_id': row[0],
+                    u'timestamp': row[1],
+                    u'value': row[2]
+                } for row in cursor.fetchall() ]
+        
+        ret = map(lambda d: dict(d, timestamp=datetime.datetime.utcfromtimestamp(d[u'timestamp'])), mid)
+        return ret
     
-    def _put_daily_data(self, table_name, aws_access_key_id, value, timestamp):
-#         :todo: aws_access_key_id
+    def _put_daily_data(self, service_name, value, timestamp):
         unixtime = calendar.timegm(timestamp.utctimetuple())
-        return _db.table(table_name).insert({ u'aws_access_key_id': aws_access_key_id, u'value': value, u'timestamp': unixtime })
+        with connect_db() as db:
+            db.execute(u'insert into service_costs values (null, ?, ?, ?, ?)', (service_name, self._aws_access_key_id, unixtime, value, ))
+            db.commit()
 
 
 class MonthlyCostStore(object):

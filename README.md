@@ -10,7 +10,7 @@ git clone https://github.com/megmogmog1965/awscostchart.git
 
 # build project.
 cd awscostchart
-pip install flask flask-autodoc boto tinydb
+pip install flask flask-autodoc boto
 npm install
 npm run build
 
