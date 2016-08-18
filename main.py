@@ -146,13 +146,27 @@ def post_awskey():
     
     return jsonify(name=name, aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key)
 
+@auto.doc()
+@app.route('/apis/awskeys/<aws_access_key_id>', methods=['DELETE'])
+def delete_awskey(aws_access_key_id):
+    '''
+    :param aws_access_key_id: aws_access_key_id
+    '''
+    # update db.
+    AwsKeyStore.deleteKey(aws_access_key_id)
+    
+    return jsonify(aws_access_key_id=aws_access_key_id)
+
 def _fetch_billings_every_day(hour=14, minute=0, second=0):
     '''
     start daemon thread to fetch aws-billing.
     '''
     def _exec():
+        # keys without duplicates.
+        key_list = { key.aws_access_key_id: key for key in map(lambda k: Dot(k), AwsKeyStore.keys()) }.values()
+        
         # update db.
-        for key in map(lambda k: Dot(k), AwsKeyStore.keys()):
+        for key in key_list:
             # fetch.
             o = aws_billing(key.aws_access_key_id, key.aws_secret_access_key)
             res = o.estimated_charge()

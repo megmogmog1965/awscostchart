@@ -40,3 +40,10 @@ class AwsKeyStore(object):
         with connect_db() as db:
             db.execute(u'insert into awskeys values (?, ?, ?)', (aws_access_key_id, aws_secret_access_key, name, ))
             db.commit()
+    
+    @classmethod
+    def deleteKey(cls, aws_access_key_id):
+        with connect_db() as db:
+            db.execute(u'delete from awskeys where aws_access_key_id=?', (aws_access_key_id, ))
+            db.commit()
+

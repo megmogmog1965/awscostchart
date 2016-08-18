@@ -3,8 +3,8 @@ import * as ReactDOM from 'react-dom';
 import * as Highcharts from 'highcharts';
 import * as $ from 'jquery';
 
-import * as Types from './classes/Types';
-import { bindPrivateMethods } from './classes/Utils';
+import * as Types from '../classes/Types';
+import { bindPrivateMethods } from '../classes/Utils';
 
 
 export interface State {}
@@ -14,9 +14,9 @@ export interface Props {
   estimatedCharge: Types.TEstimatedCharge;
 }
 
-export class StackedColumnChart extends React.Component<Props, State> {
+export class Chart extends React.Component<Props, State> {
 
-  private _id: string = 'StackedColumnChart_' + Math.random();
+  private _id: string = 'Chart_' + Math.random();
 
   constructor() {
     super();
@@ -45,13 +45,14 @@ export class StackedColumnChart extends React.Component<Props, State> {
    * @param data: [ [ unixtime, value ], ... ]
    */
   private _render_highcharts(data): void {
-    let elmId = 'stackedcolumnchartelm_' + this._id;
+    let elmId = 'chartelm_' + this._id;
     let element = React.createElement('div', { id: elmId });
     ReactDOM.render(element, document.getElementById(this._id), () => {
       // addFunnel(Highcharts);
       Highcharts.chart(elmId, {
         chart: {
-            type: 'column'
+            // type: 'spline'
+            type: 'area'
         },
         title: {
             text: this.props.title
@@ -86,15 +87,17 @@ export class StackedColumnChart extends React.Component<Props, State> {
             pointFormat: '{point.x:%e. %b, %Y}: {point.y:.0f} USD'
         },
         plotOptions: {
-            column: {
+            // spline: {
+            //     marker: {
+            //         enabled: false
+            //     }
+            // }
+            area: {
                 stacking: 'normal',
-                dataLabels: {
-                    enabled: true,
-                    // color: (Highcharts.theme && Highcharts.theme.dataLabelsColor) || 'white',
-                    color: 'white',
-                    style: {
-                        textShadow: '0 0 3px black'
-                    }
+                lineColor: '#666666',
+                lineWidth: 1,
+                marker: {
+                    enabled: false
                 }
             }
         },
@@ -116,7 +119,7 @@ export class StackedColumnChart extends React.Component<Props, State> {
 
   render () {
     return (
-      <div className='StackedColumnChart chart'>
+      <div className='Chart chart'>
         <div id={ this._id } style={ { width: '100%' } }></div>
       </div>
     );

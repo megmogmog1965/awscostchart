@@ -13,7 +13,6 @@ body {
 
 /* Style The Dropdown Button */
 .dropbtn {
-  padding: 0.4em;
   font-size: 1em;
   cursor: pointer;
 }
@@ -92,9 +91,10 @@ div.Header a {
   text-decoration: none;
 }
 
-div.Header .dropbtn {
-  border-left: dotted 1px #3CB2D0;
-  border-right: dotted 1px #3CB2D0;
+div.Header .header-menu {
+  display: inline-block;
+  margin-right: 2em;
+  /*border-right: dotted 1px #3CB2D0;*/
   color: #3CB2D0;
 }
 
