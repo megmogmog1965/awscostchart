@@ -7,8 +7,8 @@ body {
 }
 
 .content {
-  margin: 2.5em 0 0 0; /* for fixed HEADER */
-  padding: 0;
+  padding: 2.5em 1em 0 1em; /* for fixed HEADER */
+  color: #ffffff;
 }
 
 /* Style The Dropdown Button */
@@ -96,11 +96,6 @@ div.Header .header-menu {
   margin-right: 2em;
   /*border-right: dotted 1px #3CB2D0;*/
   color: #3CB2D0;
-}
-
-.content {
-  padding: 0 1em;
-  color: #ffffff;
 }
 
 .chart {
